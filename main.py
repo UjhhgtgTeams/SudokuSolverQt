@@ -1,68 +1,53 @@
-import sys
+import sys, time
 from PySide6.QtWidgets import *
 from PySide6.QtGui import *
 from PySide6.QtCore import *
 import PyQt6.QtCore
 import PyQt6.Qt
 from math import floor
-
+# sudoku = [
+#     [7, 4, 0, 2, 0, 9, 0, 0, 0],
+#     [0, 2, 0, 0, 8, 4, 0, 9, 0],
+#     [8, 0, 0, 0, 0, 3, 4, 0, 0],
+#     [5, 8, 0, 3, 0, 0, 0, 0, 0],
+#     [0, 0, 1, 0, 6, 0, 5, 0, 0],
+#     [0, 0, 0, 0, 0, 5, 0, 1, 9],
+#     [0, 0, 7, 5, 0, 0, 0, 0, 1],
+#     [0, 5, 0, 1, 4, 0, 0, 7, 0],
+#     [0, 0, 0, 9, 0, 2, 0, 5, 4]
+#     ]
+# sudoku = [
+#     [8, 0, 0, 0, 0, 0, 0, 0, 0],
+#     [0, 0, 3, 6, 0, 0, 0, 0, 0],
+#     [0, 7, 0, 0, 9, 0, 2, 0, 0],
+#     [0, 5, 0, 0, 0, 7, 0, 0, 0],
+#     [0, 0, 0, 0, 4, 5, 7, 0, 0],
+#     [0, 0, 0, 1, 0, 0, 0, 3, 0],
+#     [0, 0, 1, 0, 0, 0, 0, 6, 8],
+#     [0, 0, 8, 5, 0, 0, 0, 1, 0],
+#     [0, 9, 0, 0, 0, 0, 4, 0, 0]
+#     ]
 sudoku = [
-    [8, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 3, 6, 0, 0, 0, 0, 0],
-    [0, 7, 0, 0, 9, 0, 2, 0, 0],
-    [0, 5, 0, 0, 0, 7, 0, 0, 0],
-    [0, 0, 0, 0, 4, 5, 7, 0, 0],
-    [0, 0, 0, 1, 0, 0, 0, 3, 0],
-    [0, 0, 1, 0, 0, 0, 0, 6, 8],
-    [0, 0, 8, 5, 0, 0, 0, 1, 0],
-    [0, 9, 0, 0, 0, 0, 4, 0, 0]
+    [0, 8, 0, 0, 0, 0, 0, 0, 0],
+    [0, 1, 5, 0, 9, 0, 0, 0, 0],
+    [0, 0, 0, 6, 0, 8, 1, 0, 0],
+    [5, 0, 0, 3, 4, 0, 2, 0, 0],
+    [1, 7, 0, 0, 0, 0, 0, 9, 4],
+    [0, 0, 3, 0, 8, 9, 0, 0, 1],
+    [0, 0, 9, 5, 0, 4, 0, 0, 0],
+    [0, 0, 0, 0, 3, 0, 6, 7, 0],
+    [0, 0, 0, 0, 0, 0, 0, 5, 0]
     ]
 x = 0
 y = 0
 xP = 0
 yP = 0
-btEnd = False
 stepTime = 0
+btEnd = False
 possibilities = "123456789"
 stopBasic = False
 noSolution = False
 solutedNumbers = 0
-
-def stepGrid(stepType):
-    global xP, yP, stepTime, sudoku
-    stepTime += 1
-    if stepType == "n":
-        if yP != 8:
-            yP += 1
-            if sudoku[xP][yP] > 0:
-                stepGrid("n")
-            else:
-                sudoku[xP][yP] = 0
-        else:
-            if xP != 8:
-                xP += 1
-                yP = 0
-                if sudoku[xP][yP] > 0:
-                    stepGrid("n")
-                else:
-                    sudoku[xP][yP] = 0
-            else:
-                showRight()
-    elif stepType == "b":
-        if yP != 0:
-            yP -= 1
-            if sudoku[xP][yP] > 0:
-                stepGrid("b")
-            else:
-                sudoku[xP][yP] = 0
-        else:
-            if xP != 0:
-                xP -= 1
-                yP = 8
-                if sudoku[xP][yP] > 0:
-                    stepGrid("b")
-                else:
-                    sudoku[xP][yP] = 0
 
 def calcPos(xN, yN, sN=0, calcT=True):
     global possibilities, sudoku
@@ -88,38 +73,7 @@ def calcPos(xN, yN, sN=0, calcT=True):
                 if abs(sN) == abs(sudoku[j][yN]):
                     return False
 
-def showRight():
-    global sudoku, stepTime, btEnd
-    for fx in range(9):
-        for fy in range(9):
-            sudoku[fx][fy] = abs(sudoku[fx][fy])
-    btEnd = True
-    exit()
 
-def basic():
-    global x, y, sudoku, possibilities, solutedNumbers, noSolution, stopBasic
-    while stopBasic is False:
-        for x in range(9):
-            for y in range(9):
-                if sudoku[x][y] == 0:
-                    calcPos(x, y)
-                    if len(possibilities) == 1:
-                        sudoku[x][y] = int(possibilities)
-                        tblItem = QTableWidgetItem(possibilities)
-                        tblItem.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter | Qt.AlignCenter)
-                        SSGui().tblSudoku.setItem(x, y, tblItem)
-                        solutedNumbers += 1
-                possibilities = "123456789"
-        if solutedNumbers == 0:
-            noSolution = True
-            pass
-            break
-        solutedNumbers = 0
-        stopBasic = True
-        for n in range(9):
-            for p in range(9):
-                if sudoku[n][p] == 0:
-                    stopBasic = False
 
 class SSGui(QWidget):
     def __init__(self):
@@ -130,7 +84,7 @@ class SSGui(QWidget):
         global sudoku
         ## Init layout
         layout = QVBoxLayout()
-        # self.setWindowFlags(Qt.FramelessWindowHint)
+        # self.setWindowFlags(Qt.SubWindow)
         self.setWindowTitle(r"*** Sudoku Solver GUI ***   |   By: Ujhhgtg")
         self.resize(800, 700)
         ## Buttons!!!
@@ -142,16 +96,21 @@ class SSGui(QWidget):
         ## Tables!!!
         # Sudoku Table
         self.tblSudoku = QTableWidget(9, 9)
-        self.tblSudoku.setFont(QFont("Noto Sans", 14, QFont.Bold))
+        self.tblSudoku.setFont(QFont("Noto Sans Arabic Light", 20))
         self.tblSudoku.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.tblSudoku.verticalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.tblSudoku.setVerticalHeaderLabels(["1", "2", "3", "4", "5", "6", "7", "8", "9"])
-        self.tblSudoku.setHorizontalHeaderLabels(["A", "B", "C", "D", "E", "F", "G", "H", "I"])
+        self.tblSudoku.horizontalHeader().setVisible(False)
+        self.tblSudoku.verticalHeader().setVisible(False)
         # Set Initial Sudoku
         for ix in range(9):
             for iy in range(9):
                 if sudoku[ix][iy] != 0:
                     tblItem = QTableWidgetItem(str(sudoku[ix][iy]))
+                    tblItem.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter | Qt.AlignCenter)
+                    self.tblSudoku.setItem(ix, iy, tblItem)
+                    QApplication.processEvents()
+                else:
+                    tblItem = QTableWidgetItem("")
                     tblItem.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter | Qt.AlignCenter)
                     self.tblSudoku.setItem(ix, iy, tblItem)
                     QApplication.processEvents()
@@ -161,54 +120,141 @@ class SSGui(QWidget):
         self.setLayout(layout)
 
     def runSolver(self):
-        global btEnd
+        global btEnd, sudoku
+        for ax in range(9):
+            for ay in range(9):
+                gotItem = self.tblSudoku.item(ax, ay).text()
+                if gotItem != "":
+                    sudoku[ax][ay] = int(self.tblSudoku.item(ax, ay).text())
+                else:
+                    sudoku[ax][ay] = 0
         self.btnRun.setEnabled(False)
         self.btnRun.setText("Calculating...")
         self.tblSudoku.setEditTriggers(QAbstractItemView.NoEditTriggers)
         QApplication.processEvents()
-        basic()
-        QApplication.processEvents()
-        subThread = backtrack()
-        subThread.breakSignal.connect(updTable)
+        subThread = calculate()
+        subThread.updTblSignal.connect(updTable)
+        subThread.updSttSignal.connect(updStatus)
+        subThread.basic()
         subThread.start()
         while not btEnd:
             QApplication.processEvents()
-        btEnd = False
-        self.btnRun.setText("Finished!")
-        QApplication.processEvents()
 
-class backtrack(PyQt6.QtCore.QThread):
-    breakSignal = PyQt6.QtCore.pyqtSignal(int)
+class calculate(PyQt6.QtCore.QThread):
+    updTblSignal = PyQt6.QtCore.pyqtSignal(int, int, int)
+    updSttSignal = PyQt6.QtCore.pyqtSignal()
     def __init__(self):
         super().__init__()
         
     def run(self):
         global sudoku, xP, yP
         if xP == 8 and yP == 8 and sudoku[xP][yP] > 0:
-            showRight()
+            return self.showRight()
         if sudoku[xP][yP] == 0:
             for testNum in range(1, 10):
                 testNum = 0 - testNum
                 if calcPos(xP, yP, testNum, False) is False:
                     continue
                 sudoku[xP][yP] = testNum
-                self.breakSignal.emit(abs(testNum))
+                self.updTblSignal.emit(xP, yP, abs(testNum))
+                time.sleep(0.01)
                 if xP == 8 and yP == 8:
-                    showRight()
-                stepGrid("n")
+                    return self.showRight()
+                self.stepGrid("n")
                 self.run()
-            stepGrid("b")
+            self.stepGrid("b")
         else:
-            stepGrid("n")
+            self.stepGrid("n")
             self.run()
+
+    def stepGrid(self, stepType):
+        global xP, yP, stepTime, sudoku
+        stepTime += 1
+        if stepType == "n":
+            if yP != 8:
+                yP += 1
+                if sudoku[xP][yP] > 0:
+                    self.stepGrid("n")
+                else:
+                    sudoku[xP][yP] = 0
+                    self.updTblSignal.emit(xP, yP, 0)
+            else:
+                if xP != 8:
+                    xP += 1
+                    yP = 0
+                    if sudoku[xP][yP] > 0:
+                        self.stepGrid("n")
+                    else:
+                        sudoku[xP][yP] = 0
+                        self.updTblSignal.emit(xP, yP, 0)
+                else:
+                    return self.showRight()
+        elif stepType == "b":
+            if yP != 0:
+                yP -= 1
+                if sudoku[xP][yP] > 0:
+                    self.stepGrid("b")
+                else:
+                    sudoku[xP][yP] = 0
+                    self.updTblSignal.emit(xP, yP, 0)
+            else:
+                if xP != 0:
+                    xP -= 1
+                    yP = 8
+                    if sudoku[xP][yP] > 0:
+                        self.stepGrid("b")
+                    else:
+                        sudoku[xP][yP] = 0
+                        self.updTblSignal.emit(xP, yP, 0)
+
+    def showRight(self):
+        global sudoku, stepTime, btEnd
+        for fx in range(9):
+            for fy in range(9):
+                sudoku[fx][fy] = abs(sudoku[fx][fy])
+        btEnd = True
+        self.updSttSignal.emit()
+        return True
+    
+    def basic(self):
+        global x, y, sudoku, possibilities, solutedNumbers, noSolution, stopBasic
+        while stopBasic is False:
+            for x in range(9):
+                for y in range(9):
+                    if sudoku[x][y] == 0:
+                        calcPos(x, y)
+                        if len(possibilities) == 1:
+                            sudoku[x][y] = int(possibilities)
+                            self.updTblSignal.emit(x, y, int(possibilities))
+                            QApplication.processEvents()
+                            solutedNumbers += 1
+                    possibilities = "123456789"
+            if solutedNumbers == 0:
+                noSolution = True
+                pass
+                break
+            solutedNumbers = 0
+            stopBasic = True
+            for n in range(9):
+                for p in range(9):
+                    if sudoku[n][p] == 0:
+                        stopBasic = False
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     widget = SSGui()
     widget.show()
-    def updTable(uNum):
-        global xP, yP
-        tblItem = QTableWidgetItem(str(uNum))
-        tblItem.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter | Qt.AlignCenter)
-        widget.tblSudoku.setItem(xP, yP, tblItem)
+    def updTable(uX, uY, uNum):
+        global widget
+        if uNum != 0:
+            tblItem = QTableWidgetItem(str(uNum))
+            tblItem.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter | Qt.AlignCenter)
+            tblItem.setForeground(QBrush(QColor(139, 129, 76)))
+        else:
+            tblItem = QTableWidgetItem("")
+            tblItem.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter | Qt.AlignCenter)
+        widget.tblSudoku.setItem(uX, uY, tblItem)
+    def updStatus():
+        global widget
+        widget.btnRun.setText("Finished!")
     sys.exit(app.exec())
