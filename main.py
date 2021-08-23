@@ -1,10 +1,9 @@
-# This Python file uses the following encoding: utf-8
-from datetime import datetime
 import sys
-import os
-import threading
 from PySide6.QtWidgets import *
 from PySide6.QtGui import *
+from PySide6.QtCore import *
+import PyQt6.QtCore
+import PyQt6.Qt
 from math import floor
 
 sudoku = [
@@ -28,18 +27,6 @@ possibilities = "123456789"
 stopBasic = False
 noSolution = False
 solutedNumbers = 0
-
-
-def cls():
-    sys.system('cls' if os.name == 'nt' else 'clear')
-
-
-def formatList():
-    global sudoku
-    for a in range(9):
-        for b in range(9):
-            sudoku[a][b] = int(sudoku[a][b])
-
 
 def stepGrid(stepType):
     global xP, yP, stepTime, sudoku
@@ -77,7 +64,6 @@ def stepGrid(stepType):
                 else:
                     sudoku[xP][yP] = 0
 
-
 def calcPos(xN, yN, sN=0, calcT=True):
     global possibilities, sudoku
     k = floor(xN / 3) * 3
@@ -102,7 +88,6 @@ def calcPos(xN, yN, sN=0, calcT=True):
                 if abs(sN) == abs(sudoku[j][yN]):
                     return False
 
-
 def showRight():
     global sudoku, stepTime, btEnd
     for fx in range(9):
@@ -110,27 +95,6 @@ def showRight():
             sudoku[fx][fy] = abs(sudoku[fx][fy])
     btEnd = True
     exit()
-
-
-def backtrack():
-    global sudoku, xP, yP
-    if xP == 8 and yP == 8 and sudoku[xP][yP] > 0:
-        showRight()
-    if sudoku[xP][yP] == 0:
-        for testNum in range(1, 10):
-            testNum = 0 - testNum
-            if calcPos(xP, yP, testNum, False) is False:
-                continue
-            sudoku[xP][yP] = testNum
-            if xP == 8 and yP == 8:
-                showRight()
-            stepGrid("n")
-            backtrack()
-        stepGrid("b")
-    else:
-        stepGrid("n")
-        backtrack()
-
 
 def basic():
     global x, y, sudoku, possibilities, solutedNumbers, noSolution, stopBasic
@@ -141,6 +105,9 @@ def basic():
                     calcPos(x, y)
                     if len(possibilities) == 1:
                         sudoku[x][y] = int(possibilities)
+                        tblItem = QTableWidgetItem(possibilities)
+                        tblItem.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter | Qt.AlignCenter)
+                        SSGui().tblSudoku.setItem(x, y, tblItem)
                         solutedNumbers += 1
                 possibilities = "123456789"
         if solutedNumbers == 0:
@@ -154,34 +121,44 @@ def basic():
                 if sudoku[n][p] == 0:
                     stopBasic = False
 
-
 class SSGui(QWidget):
     def __init__(self):
         super(SSGui, self).__init__()
+        self.init_ui()
+        
+    def init_ui(self):
+        global sudoku
         ## Init layout
-        # layout = QGridLayout()
+        layout = QVBoxLayout()
+        # self.setWindowFlags(Qt.FramelessWindowHint)
         self.setWindowTitle(r"*** Sudoku Solver GUI ***   |   By: Ujhhgtg")
-        self.setGeometry(0, 0, 800, 700)
+        self.resize(800, 700)
         ## Buttons!!!
         # Run Button
         self.btnRun = QPushButton("RUN!!!", self)
-        self.btnRun.setGeometry(310, 640, 170, 40)
         self.btnRun.setFont(QFont("Noto Sans", 14))
+        self.btnRun.setCursor(QCursor(Qt.PointingHandCursor))
         self.btnRun.clicked.connect(self.runSolver)
         ## Tables!!!
         # Sudoku Table
         self.tblSudoku = QTableWidget(9, 9)
-        self.tblSudoku.setGeometry(100, 20, 600, 600)
         self.tblSudoku.setFont(QFont("Noto Sans", 14, QFont.Bold))
         self.tblSudoku.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.tblSudoku.verticalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.tblSudoku.setHorizontalHeaderLabels(["0", "1", "2", "3", "4", "5", "6", "7", "8"])
-        self.tblSudoku.setVerticalHeaderLabels(["A", "B", "C", "D", "E", "F", "G", "H", "I"])
-        # self.tblSudoku.setVisible(True)
+        self.tblSudoku.setVerticalHeaderLabels(["1", "2", "3", "4", "5", "6", "7", "8", "9"])
+        self.tblSudoku.setHorizontalHeaderLabels(["A", "B", "C", "D", "E", "F", "G", "H", "I"])
+        # Set Initial Sudoku
+        for ix in range(9):
+            for iy in range(9):
+                if sudoku[ix][iy] != 0:
+                    tblItem = QTableWidgetItem(str(sudoku[ix][iy]))
+                    tblItem.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter | Qt.AlignCenter)
+                    self.tblSudoku.setItem(ix, iy, tblItem)
+                    QApplication.processEvents()
         ## Show Widgets
-        # layout.addWidget(self.btnRun)
-        # layout.addWidget(self.tblSudoku)
-        # self.setLayout(layout)
+        layout.addWidget(self.tblSudoku)
+        layout.addWidget(self.btnRun)
+        self.setLayout(layout)
 
     def runSolver(self):
         global btEnd
@@ -190,18 +167,48 @@ class SSGui(QWidget):
         self.tblSudoku.setEditTriggers(QAbstractItemView.NoEditTriggers)
         QApplication.processEvents()
         basic()
-        subThread = threading.Thread(target = backtrack, name = "btFunction")
+        QApplication.processEvents()
+        subThread = backtrack()
+        subThread.breakSignal.connect(updTable)
         subThread.start()
         while not btEnd:
-            print(sep="", end="")
+            QApplication.processEvents()
         btEnd = False
-        self.btnRun.setEnabled(True)
         self.btnRun.setText("Finished!")
         QApplication.processEvents()
 
+class backtrack(PyQt6.QtCore.QThread):
+    breakSignal = PyQt6.QtCore.pyqtSignal(int)
+    def __init__(self):
+        super().__init__()
+        
+    def run(self):
+        global sudoku, xP, yP
+        if xP == 8 and yP == 8 and sudoku[xP][yP] > 0:
+            showRight()
+        if sudoku[xP][yP] == 0:
+            for testNum in range(1, 10):
+                testNum = 0 - testNum
+                if calcPos(xP, yP, testNum, False) is False:
+                    continue
+                sudoku[xP][yP] = testNum
+                self.breakSignal.emit(abs(testNum))
+                if xP == 8 and yP == 8:
+                    showRight()
+                stepGrid("n")
+                self.run()
+            stepGrid("b")
+        else:
+            stepGrid("n")
+            self.run()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     widget = SSGui()
     widget.show()
+    def updTable(uNum):
+        global xP, yP
+        tblItem = QTableWidgetItem(str(uNum))
+        tblItem.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter | Qt.AlignCenter)
+        widget.tblSudoku.setItem(xP, yP, tblItem)
     sys.exit(app.exec())
