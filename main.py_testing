@@ -6,7 +6,7 @@ from PySide6.QtCore import *
 import PyQt6.QtCore
 import PyQt6.Qt
 from math import floor
-# from form import Ui_Form
+from form import *
 
 # sudoku = [
 #     [7, 4, 0, 2, 0, 9, 0, 0, 0],
@@ -53,6 +53,64 @@ noSolution = False
 solutedNumbers = 0
 
 
+class SSGui(QWidget, Ui_Form):
+    def __init__(self, parent=None):
+        super(SSGui, self).__init__(parent)
+        self.setupUi(self)
+        self.setUi()
+
+    def setUi(self):
+        # Main Window!!!
+        self.setWindowTitle("r*** Sudoku Solver GUI ***   |   By: Ujhhgtg")
+        # Buttons!!!
+        # Run Button
+        self.btnRun.setFont(QFont("Noto Sans", 14))
+        self.btnRun.setCursor(QCursor(Qt.PointingHandCursor))
+        self.btnRun.clicked.connect(self.runSolver)
+        # Tables!!!
+        # Sudoku Table
+        self.tblSudoku.setFont(QFont("Noto Sans Arabic Light", 20))
+        self.tblSudoku.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.tblSudoku.verticalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.tblSudoku.horizontalHeader().setVisible(False)
+        self.tblSudoku.verticalHeader().setVisible(False)
+        # Set Initial Sudoku
+        for ix in range(9):
+            for iy in range(9):
+                if sudoku[ix][iy] != 0:
+                    tblItem = QTableWidgetItem(str(sudoku[ix][iy]))
+                    tblItem.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter | Qt.AlignCenter)
+                    self.tblSudoku.setItem(ix, iy, tblItem)
+                    QApplication.processEvents()
+                else:
+                    tblItem = QTableWidgetItem("")
+                    tblItem.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter | Qt.AlignCenter)
+                    self.tblSudoku.setItem(ix, iy, tblItem)
+                    QApplication.processEvents()
+
+    def runSolver(self):
+        global btEnd, sudoku
+        for ax in range(9):
+            for ay in range(9):
+                gotItem = self.tblSudoku.item(ax, ay).text()
+                if gotItem != "":
+                    sudoku[ax][ay] = int(self.tblSudoku.item(ax, ay).text())
+                else:
+                    sudoku[ax][ay] = 0
+        self.btnRun.setEnabled(False)
+        self.btnRun.setText("Calculating...")
+        # noinspection PyTypeChecker
+        self.tblSudoku.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        QApplication.processEvents()
+        subThread = calculate()
+        subThread.updTblSignal.connect(updTable)
+        subThread.updSttSignal.connect(updStatus)
+        subThread.basic()
+        subThread.start()
+        while not btEnd:
+            QApplication.processEvents()
+
+
 def calcPos(xN, yN, sN=0, calcT=True):
     global possibilities, sudoku
     k = floor(xN / 3) * 3
@@ -76,77 +134,6 @@ def calcPos(xN, yN, sN=0, calcT=True):
                     return False
                 if abs(sN) == abs(sudoku[j][yN]):
                     return False
-
-
-# noinspection PyUnresolvedReferences
-# class SSGui(QWidget, Ui_Form):
-class SSGui(QWidget):
-    def __init__(self):
-        super(SSGui, self).__init__()
-        # self.setupUi(self)
-        self.init_ui()
-
-    def init_ui(self):
-        global sudoku
-        # Init layout
-        layout = QVBoxLayout()
-        self.setWindowTitle(r"*** Sudoku Solver GUI ***   |   By: Ujhhgtg")
-        self.resize(800, 700)
-        # Buttons!!!
-        # Run Button
-        self.btnRun = QPushButton("RUN!!!", self)
-        self.btnRun.setGeometry(220, 660, 361, 31)
-        self.btnRun.setFont(QFont("Noto Sans", 14))
-        self.btnRun.setCursor(QCursor(Qt.PointingHandCursor))
-        self.btnRun.clicked.connect(self.runSolver)
-        # Tables!!!
-        # Sudoku Table
-        self.tblSudoku = QTableWidget(9, 9)
-        self.tblSudoku.setGeometry(10, 10, 781, 641)
-        self.tblSudoku.setFont(QFont("Noto Sans Arabic Light", 20))
-        self.tblSudoku.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.tblSudoku.verticalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.tblSudoku.horizontalHeader().setVisible(False)
-        self.tblSudoku.verticalHeader().setVisible(False)
-        # Set Initial Sudoku
-        for ix in range(9):
-            for iy in range(9):
-                if sudoku[ix][iy] != 0:
-                    tblItem = QTableWidgetItem(str(sudoku[ix][iy]))
-                    tblItem.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter | Qt.AlignCenter)
-                    self.tblSudoku.setItem(ix, iy, tblItem)
-                    QApplication.processEvents()
-                else:
-                    tblItem = QTableWidgetItem("")
-                    tblItem.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter | Qt.AlignCenter)
-                    self.tblSudoku.setItem(ix, iy, tblItem)
-                    QApplication.processEvents()
-        # Show Widgets
-        layout.addWidget(self.tblSudoku)
-        layout.addWidget(self.btnRun)
-        self.setLayout(layout)
-
-    def runSolver(self):
-        global btEnd, sudoku
-        for ax in range(9):
-            for ay in range(9):
-                gotItem = self.tblSudoku.item(ax, ay).text()
-                if gotItem != "":
-                    sudoku[ax][ay] = int(self.tblSudoku.item(ax, ay).text())
-                else:
-                    sudoku[ax][ay] = 0
-        self.btnRun.setEnabled(False)
-        self.btnRun.setText("Calculating...")
-        # noinspection PyTypeChecker
-        self.tblSudoku.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        QApplication.processEvents()
-        subThread = calculate()
-        subThread.updTblSignal.connect(updTable)
-        subThread.updSttSignal.connect(updStatus)
-        subThread.basic()
-        subThread.start()
-        while not btEnd:
-            QApplication.processEvents()
 
 
 # noinspection PyUnresolvedReferences
