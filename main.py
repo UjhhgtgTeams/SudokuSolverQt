@@ -6,41 +6,52 @@ from PySide6.QtCore import *
 import PyQt6.QtCore
 import PyQt6.Qt
 from math import floor
+
 # from form import Ui_Form
 
-# sudoku = [
-#     [7, 4, 0, 2, 0, 9, 0, 0, 0],
-#     [0, 2, 0, 0, 8, 4, 0, 9, 0],
-#     [8, 0, 0, 0, 0, 3, 4, 0, 0],
-#     [5, 8, 0, 3, 0, 0, 0, 0, 0],
-#     [0, 0, 1, 0, 6, 0, 5, 0, 0],
-#     [0, 0, 0, 0, 0, 5, 0, 1, 9],
-#     [0, 0, 7, 5, 0, 0, 0, 0, 1],
-#     [0, 5, 0, 1, 4, 0, 0, 7, 0],
-#     [0, 0, 0, 9, 0, 2, 0, 5, 4]
-#     ]
-sudoku = [
-    [8, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 3, 6, 0, 0, 0, 0, 0],
-    [0, 7, 0, 0, 9, 0, 2, 0, 0],
-    [0, 5, 0, 0, 0, 7, 0, 0, 0],
-    [0, 0, 0, 0, 4, 5, 7, 0, 0],
-    [0, 0, 0, 1, 0, 0, 0, 3, 0],
-    [0, 0, 1, 0, 0, 0, 0, 6, 8],
-    [0, 0, 8, 5, 0, 0, 0, 1, 0],
-    [0, 9, 0, 0, 0, 0, 4, 0, 0]
-]
-# sudoku = [
-#     [0, 8, 0, 0, 0, 0, 0, 0, 0],
-#     [0, 1, 5, 0, 9, 0, 0, 0, 0],
-#     [0, 0, 0, 6, 0, 8, 1, 0, 0],
-#     [5, 0, 0, 3, 4, 0, 2, 0, 0],
-#     [1, 7, 0, 0, 0, 0, 0, 9, 4],
-#     [0, 0, 3, 0, 8, 9, 0, 0, 1],
-#     [0, 0, 9, 5, 0, 4, 0, 0, 0],
-#     [0, 0, 0, 0, 3, 0, 6, 7, 0],
-#     [0, 0, 0, 0, 0, 0, 0, 5, 0]
-#     ]
+# For Debug Purpose
+sudokuSelection = 0  # Select the sudoku | Available options : 0, 1, 2
+debugMessages = False  # Toggle if print debug messages | Available options : False, True
+# END
+
+if sudokuSelection == 0:
+    sudoku = [
+        [8, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 3, 6, 0, 0, 0, 0, 0],
+        [0, 7, 0, 0, 9, 0, 2, 0, 0],
+        [0, 5, 0, 0, 0, 7, 0, 0, 0],
+        [0, 0, 0, 0, 4, 5, 7, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0, 3, 0],
+        [0, 0, 1, 0, 0, 0, 0, 6, 8],
+        [0, 0, 8, 5, 0, 0, 0, 1, 0],
+        [0, 9, 0, 0, 0, 0, 4, 0, 0]
+    ]
+elif sudokuSelection == 1:
+    sudoku = [
+        [7, 4, 0, 2, 0, 9, 0, 0, 0],
+        [0, 2, 0, 0, 8, 4, 0, 9, 0],
+        [8, 0, 0, 0, 0, 3, 4, 0, 0],
+        [5, 8, 0, 3, 0, 0, 0, 0, 0],
+        [0, 0, 1, 0, 6, 0, 5, 0, 0],
+        [0, 0, 0, 0, 0, 5, 0, 1, 9],
+        [0, 0, 7, 5, 0, 0, 0, 0, 1],
+        [0, 5, 0, 1, 4, 0, 0, 7, 0],
+        [0, 0, 0, 9, 0, 2, 0, 5, 4]
+    ]
+elif sudokuSelection == 2:
+    sudoku = [
+        [0, 8, 0, 0, 0, 0, 0, 0, 0],
+        [0, 1, 5, 0, 9, 0, 0, 0, 0],
+        [0, 0, 0, 6, 0, 8, 1, 0, 0],
+        [5, 0, 0, 3, 4, 0, 2, 0, 0],
+        [1, 7, 0, 0, 0, 0, 0, 9, 4],
+        [0, 0, 3, 0, 8, 9, 0, 0, 1],
+        [0, 0, 9, 5, 0, 4, 0, 0, 0],
+        [0, 0, 0, 0, 3, 0, 6, 7, 0],
+        [0, 0, 0, 0, 0, 0, 0, 5, 0]
+    ]
+else:
+    raise ValueError("Invalid sudoku selection.")
 x = 0
 y = 0
 xP = 0
@@ -151,7 +162,6 @@ class SSGui(QWidget):
 
 # noinspection PyUnresolvedReferences
 class calculate(PyQt6.QtCore.QThread):
-
     updTblSignal = PyQt6.QtCore.pyqtSignal(int, int, int)
     updSttSignal = PyQt6.QtCore.pyqtSignal()
 
@@ -159,7 +169,7 @@ class calculate(PyQt6.QtCore.QThread):
         super().__init__()
 
     def run(self):
-        global sudoku, xP, yP
+        global sudoku, xP, yP, debugMessages
         if xP == 8 and yP == 8 and sudoku[xP][yP] > 0:
             return self.showRight()
         if sudoku[xP][yP] == 0:
@@ -168,6 +178,7 @@ class calculate(PyQt6.QtCore.QThread):
                 if calcPos(xP, yP, testNum, False) is False:
                     continue
                 sudoku[xP][yP] = testNum
+                if debugMessages : print("Set ", xP, ", ", yP, " to ", testNum, ".", sep="")
                 self.updTblSignal.emit(xP, yP, abs(testNum))
                 time.sleep(0.00000000000000000000000000000000000000000000000001)
                 if xP == 8 and yP == 8:
@@ -180,7 +191,7 @@ class calculate(PyQt6.QtCore.QThread):
             self.run()
 
     def stepGrid(self, stepType):
-        global xP, yP, stepTime, sudoku
+        global xP, yP, stepTime, sudoku, debugMessages
         stepTime += 1
         if stepType == "n":
             if yP != 8:
@@ -189,6 +200,7 @@ class calculate(PyQt6.QtCore.QThread):
                     self.stepGrid("n")
                 else:
                     sudoku[xP][yP] = 0
+                    if debugMessages : print("Set ", xP, ", ", yP, " to 0.", sep="")
                     self.updTblSignal.emit(xP, yP, 0)
             else:
                 if xP != 8:
@@ -198,6 +210,7 @@ class calculate(PyQt6.QtCore.QThread):
                         self.stepGrid("n")
                     else:
                         sudoku[xP][yP] = 0
+                        if debugMessages : print("Set ", xP, ", ", yP, " to 0.", sep="")
                         self.updTblSignal.emit(xP, yP, 0)
                 else:
                     return self.showRight()
@@ -208,6 +221,7 @@ class calculate(PyQt6.QtCore.QThread):
                     self.stepGrid("b")
                 else:
                     sudoku[xP][yP] = 0
+                    if debugMessages : print("Set ", xP, ", ", yP, " to 0.", sep="")
                     self.updTblSignal.emit(xP, yP, 0)
             else:
                 if xP != 0:
@@ -217,6 +231,7 @@ class calculate(PyQt6.QtCore.QThread):
                         self.stepGrid("b")
                     else:
                         sudoku[xP][yP] = 0
+                        if debugMessages : print("Set ", xP, ", ", yP, " to 0.", sep="")
                         self.updTblSignal.emit(xP, yP, 0)
 
     def showRight(self):
