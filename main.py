@@ -3,11 +3,9 @@ import time
 from PySide6.QtWidgets import *
 from PySide6.QtGui import *
 from PySide6.QtCore import *
+from math import floor
 import PyQt6.QtCore
 import PyQt6.Qt
-from math import floor
-
-# from form import Ui_Form
 
 # For Debug Purpose
 sudokuSelection = 0  # Select the sudoku | Available options : 0, 1, 2
@@ -52,6 +50,7 @@ elif sudokuSelection == 2:
     ]
 else:
     raise ValueError("Invalid sudoku selection.")
+
 x = 0
 y = 0
 xP = 0
@@ -90,35 +89,41 @@ def calcPos(xN, yN, sN=0, calcT=True):
 
 
 # noinspection PyUnresolvedReferences
-# class SSGui(QWidget, Ui_Form):
 class SSGui(QWidget):
     def __init__(self):
         super(SSGui, self).__init__()
-        # self.setupUi(self)
         self.init_ui()
 
     def init_ui(self):
         global sudoku
+
         # Init layout
         layout = QVBoxLayout()
         self.setWindowTitle(r"*** Sudoku Solver GUI ***   |   By: Ujhhgtg")
-        self.resize(800, 700)
+        self.resize(800, 740)
+
         # Buttons!!!
         # Run Button
         self.btnRun = QPushButton("RUN!!!", self)
-        self.btnRun.setGeometry(220, 660, 361, 31)
         self.btnRun.setFont(QFont("Noto Sans", 14))
         self.btnRun.setCursor(QCursor(Qt.PointingHandCursor))
-        self.btnRun.clicked.connect(self.runSolver)
+        self.btnRun.clicked.connect(lambda: self.runSolver(0))
+
+        # Fast Run Button
+        self.btnFastRun = QPushButton("FAST RUN!!!", self)
+        self.btnFastRun.setFont(QFont("Noto Sans", 14))
+        self.btnFastRun.setCursor(QCursor(Qt.PointingHandCursor))
+        self.btnFastRun.clicked.connect(lambda: self.runSolver(1))
+
         # Tables!!!
         # Sudoku Table
         self.tblSudoku = QTableWidget(9, 9)
-        self.tblSudoku.setGeometry(10, 10, 781, 641)
         self.tblSudoku.setFont(QFont("Noto Sans Arabic Light", 20))
         self.tblSudoku.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.tblSudoku.verticalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.tblSudoku.horizontalHeader().setVisible(False)
         self.tblSudoku.verticalHeader().setVisible(False)
+
         # Set Initial Sudoku
         for ix in range(9):
             for iy in range(9):
@@ -132,12 +137,14 @@ class SSGui(QWidget):
                     tblItem.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter | Qt.AlignCenter)
                     self.tblSudoku.setItem(ix, iy, tblItem)
                     QApplication.processEvents()
+
         # Show Widgets
         layout.addWidget(self.tblSudoku)
         layout.addWidget(self.btnRun)
+        layout.addWidget(self.btnFastRun)
         self.setLayout(layout)
 
-    def runSolver(self):
+    def runSolver(self, runType):
         global btEnd, sudoku
         for ax in range(9):
             for ay in range(9):
@@ -146,8 +153,16 @@ class SSGui(QWidget):
                     sudoku[ax][ay] = int(self.tblSudoku.item(ax, ay).text())
                 else:
                     sudoku[ax][ay] = 0
-        self.btnRun.setEnabled(False)
-        self.btnRun.setText("Calculating...")
+        if runType == 0:
+            self.btnRun.setText("Calculating...")
+            self.btnRun.setEnabled(False)
+            self.btnFastRun.setText("N/A")
+            self.btnFastRun.setEnabled(False)
+        else:
+            self.btnRun.setText("N/A")
+            self.btnRun.setEnabled(False)
+            self.btnFastRun.setText("Please wait while calculating in the background......")
+            self.btnFastRun.setEnabled(False)
         # noinspection PyTypeChecker
         self.tblSudoku.setEditTriggers(QAbstractItemView.NoEditTriggers)
         QApplication.processEvents()
@@ -162,8 +177,9 @@ class SSGui(QWidget):
 
 # noinspection PyUnresolvedReferences
 class calculate(PyQt6.QtCore.QThread):
+
     updTblSignal = PyQt6.QtCore.pyqtSignal(int, int, int)
-    updSttSignal = PyQt6.QtCore.pyqtSignal()
+    updSttSignal = PyQt6.QtCore.pyqtSignal(int)
 
     def __init__(self):
         super().__init__()
@@ -186,6 +202,8 @@ class calculate(PyQt6.QtCore.QThread):
                 self.stepGrid("n")
                 self.run()
             self.stepGrid("b")
+            if xP == 0 and yP == 0:
+                self.updSttSignal.emit(1)
         else:
             self.stepGrid("n")
             self.run()
@@ -240,7 +258,7 @@ class calculate(PyQt6.QtCore.QThread):
             for fy in range(9):
                 sudoku[fx][fy] = abs(sudoku[fx][fy])
         btEnd = True
-        self.updSttSignal.emit()
+        self.updSttSignal.emit(0)
         return True
 
     def basic(self):
@@ -273,7 +291,6 @@ if __name__ == "__main__":
     widget = SSGui()
     widget.show()
 
-
     def updTable(uX, uY, uNum):
         global widget
         if uNum != 0:
@@ -286,9 +303,11 @@ if __name__ == "__main__":
         widget.tblSudoku.setItem(uX, uY, tblItem)
 
 
-    def updStatus():
+    def updStatus(sT):
         global widget
-        widget.btnRun.setText("Finished!")
-
+        if sT == 0:
+            widget.btnRun.setText("Finished!")
+        else:
+            widget.btnRun.setText("No solution found. The sudoku is probably wrong.")
 
     sys.exit(app.exec())

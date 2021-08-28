@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>700</height>
+    <height>740</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,10 +16,10 @@
   <widget class="QPushButton" name="btnRun">
    <property name="geometry">
     <rect>
-     <x>220</x>
+     <x>10</x>
      <y>660</y>
-     <width>361</width>
-     <height>31</height>
+     <width>780</width>
+     <height>30</height>
     </rect>
    </property>
    <property name="font">
@@ -130,6 +130,24 @@
      <string>I</string>
     </property>
    </column>
+  </widget>
+  <widget class="QPushButton" name="btnFastRun">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>700</y>
+     <width>780</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>14</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>RUN WITH FAST MODE!!!</string>
+   </property>
   </widget>
  </widget>
  <resources/>
