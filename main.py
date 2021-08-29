@@ -147,13 +147,6 @@ class SSGui(QWidget):
 
     def runSolver(self, runType):
         global btEnd, sudoku, fastMode
-        for ax in range(9):
-            for ay in range(9):
-                gotItem = self.tblSudoku.item(ax, ay).text()
-                if gotItem != "":
-                    sudoku[ax][ay] = int(self.tblSudoku.item(ax, ay).text())
-                else:
-                    sudoku[ax][ay] = 0
         if runType == 0:
             self.btnRun.setText("Calculating...")
             self.btnRun.setEnabled(False)
@@ -165,6 +158,17 @@ class SSGui(QWidget):
             self.btnFastRun.setText("Please wait while calculating in the background......")
             self.btnFastRun.setEnabled(False)
             fastMode = True
+        for ax in range(9):
+            for ay in range(9):
+                gotItem = self.tblSudoku.item(ax, ay).text()
+                if gotItem != "":
+                    try:
+                        sudoku[ax][ay] = int(self.tblSudoku.item(ax, ay).text())
+                    except:
+                        self.btnRun.setText("Invalid item(s) appeared. Please check and retry.")
+                        self.btnFastRun.setText("Invalid item(s) appeared. Please check and retry.")
+                else:
+                    sudoku[ax][ay] = 0
         # noinspection PyTypeChecker
         self.tblSudoku.setEditTriggers(QAbstractItemView.NoEditTriggers)
         QApplication.processEvents()
@@ -196,8 +200,8 @@ class calculate(PyQt6.QtCore.QThread):
                     continue
                 sudoku[xP][yP] = testNum
                 if debugMessages: print("Set ", xP, ", ", yP, " to ", testNum, ".", sep="")
-                if not fastMode : self.updTblSignal.emit(xP, yP, abs(testNum))
-                if not fastMode : time.sleep(0.00000000000000000000000000000000000000000000000001)
+                if not fastMode: self.updTblSignal.emit(xP, yP, abs(testNum))
+                if not fastMode: time.sleep(0.00000000000000000000000000000000000000000000000001)
                 if xP == 8 and yP == 8:
                     return self.showRight()
                 self.stepGrid("n")
@@ -220,7 +224,7 @@ class calculate(PyQt6.QtCore.QThread):
                 else:
                     sudoku[xP][yP] = 0
                     if debugMessages: print("Set ", xP, ", ", yP, " to 0.", sep="")
-                    if not fastMode : self.updTblSignal.emit(xP, yP, 0)
+                    if not fastMode: self.updTblSignal.emit(xP, yP, 0)
             else:
                 if xP != 8:
                     xP += 1
@@ -230,7 +234,7 @@ class calculate(PyQt6.QtCore.QThread):
                     else:
                         sudoku[xP][yP] = 0
                         if debugMessages: print("Set ", xP, ", ", yP, " to 0.", sep="")
-                        if not fastMode : self.updTblSignal.emit(xP, yP, 0)
+                        if not fastMode: self.updTblSignal.emit(xP, yP, 0)
                 else:
                     return self.showRight()
         elif stepType == "b":
@@ -241,7 +245,7 @@ class calculate(PyQt6.QtCore.QThread):
                 else:
                     sudoku[xP][yP] = 0
                     if debugMessages: print("Set ", xP, ", ", yP, " to 0.", sep="")
-                    if not fastMode : self.updTblSignal.emit(xP, yP, 0)
+                    if not fastMode: self.updTblSignal.emit(xP, yP, 0)
             else:
                 if xP != 0:
                     xP -= 1
@@ -251,14 +255,14 @@ class calculate(PyQt6.QtCore.QThread):
                     else:
                         sudoku[xP][yP] = 0
                         if debugMessages: print("Set ", xP, ", ", yP, " to 0.", sep="")
-                        if not fastMode : self.updTblSignal.emit(xP, yP, 0)
+                        if not fastMode: self.updTblSignal.emit(xP, yP, 0)
 
     def showRight(self):
         global sudoku, stepTime, btEnd, fastMode
         for fx in range(9):
             for fy in range(9):
                 sudoku[fx][fy] = abs(sudoku[fx][fy])
-                if fastMode : self.updTblSignal.emit(fx, fy, abs(sudoku[fx][fy]))
+                if fastMode: self.updTblSignal.emit(fx, fy, abs(sudoku[fx][fy]))
         btEnd = True
         self.updSttSignal.emit(0)
         return True
@@ -272,7 +276,7 @@ class calculate(PyQt6.QtCore.QThread):
                         calcPos(x, y)
                         if len(possibilities) == 1:
                             sudoku[x][y] = int(possibilities)
-                            if not fastMode : self.updTblSignal.emit(x, y, int(possibilities))
+                            if not fastMode: self.updTblSignal.emit(x, y, int(possibilities))
                             QApplication.processEvents()
                             solutedNumbers += 1
                     possibilities = "123456789"
