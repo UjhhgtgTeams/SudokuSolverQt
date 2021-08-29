@@ -57,10 +57,11 @@ xP = 0
 yP = 0
 stepTime = 0
 btEnd = False
-possibilities = "123456789"
+fastMode = False
 stopBasic = False
 noSolution = False
 solutedNumbers = 0
+possibilities = "123456789"
 
 
 def calcPos(xN, yN, sN=0, calcT=True):
@@ -145,7 +146,7 @@ class SSGui(QWidget):
         self.setLayout(layout)
 
     def runSolver(self, runType):
-        global btEnd, sudoku
+        global btEnd, sudoku, fastMode
         for ax in range(9):
             for ay in range(9):
                 gotItem = self.tblSudoku.item(ax, ay).text()
@@ -163,6 +164,7 @@ class SSGui(QWidget):
             self.btnRun.setEnabled(False)
             self.btnFastRun.setText("Please wait while calculating in the background......")
             self.btnFastRun.setEnabled(False)
+            fastMode = True
         # noinspection PyTypeChecker
         self.tblSudoku.setEditTriggers(QAbstractItemView.NoEditTriggers)
         QApplication.processEvents()
@@ -177,7 +179,6 @@ class SSGui(QWidget):
 
 # noinspection PyUnresolvedReferences
 class calculate(PyQt6.QtCore.QThread):
-
     updTblSignal = PyQt6.QtCore.pyqtSignal(int, int, int)
     updSttSignal = PyQt6.QtCore.pyqtSignal(int)
 
@@ -185,7 +186,7 @@ class calculate(PyQt6.QtCore.QThread):
         super().__init__()
 
     def run(self):
-        global sudoku, xP, yP, debugMessages
+        global sudoku, xP, yP, debugMessages, fastMode
         if xP == 8 and yP == 8 and sudoku[xP][yP] > 0:
             return self.showRight()
         if sudoku[xP][yP] == 0:
@@ -194,9 +195,9 @@ class calculate(PyQt6.QtCore.QThread):
                 if calcPos(xP, yP, testNum, False) is False:
                     continue
                 sudoku[xP][yP] = testNum
-                if debugMessages : print("Set ", xP, ", ", yP, " to ", testNum, ".", sep="")
-                self.updTblSignal.emit(xP, yP, abs(testNum))
-                time.sleep(0.00000000000000000000000000000000000000000000000001)
+                if debugMessages: print("Set ", xP, ", ", yP, " to ", testNum, ".", sep="")
+                if not fastMode : self.updTblSignal.emit(xP, yP, abs(testNum))
+                if not fastMode : time.sleep(0.00000000000000000000000000000000000000000000000001)
                 if xP == 8 and yP == 8:
                     return self.showRight()
                 self.stepGrid("n")
@@ -209,7 +210,7 @@ class calculate(PyQt6.QtCore.QThread):
             self.run()
 
     def stepGrid(self, stepType):
-        global xP, yP, stepTime, sudoku, debugMessages
+        global xP, yP, stepTime, sudoku, debugMessages, fastMode
         stepTime += 1
         if stepType == "n":
             if yP != 8:
@@ -218,8 +219,8 @@ class calculate(PyQt6.QtCore.QThread):
                     self.stepGrid("n")
                 else:
                     sudoku[xP][yP] = 0
-                    if debugMessages : print("Set ", xP, ", ", yP, " to 0.", sep="")
-                    self.updTblSignal.emit(xP, yP, 0)
+                    if debugMessages: print("Set ", xP, ", ", yP, " to 0.", sep="")
+                    if not fastMode : self.updTblSignal.emit(xP, yP, 0)
             else:
                 if xP != 8:
                     xP += 1
@@ -228,8 +229,8 @@ class calculate(PyQt6.QtCore.QThread):
                         self.stepGrid("n")
                     else:
                         sudoku[xP][yP] = 0
-                        if debugMessages : print("Set ", xP, ", ", yP, " to 0.", sep="")
-                        self.updTblSignal.emit(xP, yP, 0)
+                        if debugMessages: print("Set ", xP, ", ", yP, " to 0.", sep="")
+                        if not fastMode : self.updTblSignal.emit(xP, yP, 0)
                 else:
                     return self.showRight()
         elif stepType == "b":
@@ -239,8 +240,8 @@ class calculate(PyQt6.QtCore.QThread):
                     self.stepGrid("b")
                 else:
                     sudoku[xP][yP] = 0
-                    if debugMessages : print("Set ", xP, ", ", yP, " to 0.", sep="")
-                    self.updTblSignal.emit(xP, yP, 0)
+                    if debugMessages: print("Set ", xP, ", ", yP, " to 0.", sep="")
+                    if not fastMode : self.updTblSignal.emit(xP, yP, 0)
             else:
                 if xP != 0:
                     xP -= 1
@@ -249,20 +250,21 @@ class calculate(PyQt6.QtCore.QThread):
                         self.stepGrid("b")
                     else:
                         sudoku[xP][yP] = 0
-                        if debugMessages : print("Set ", xP, ", ", yP, " to 0.", sep="")
-                        self.updTblSignal.emit(xP, yP, 0)
+                        if debugMessages: print("Set ", xP, ", ", yP, " to 0.", sep="")
+                        if not fastMode : self.updTblSignal.emit(xP, yP, 0)
 
     def showRight(self):
-        global sudoku, stepTime, btEnd
+        global sudoku, stepTime, btEnd, fastMode
         for fx in range(9):
             for fy in range(9):
                 sudoku[fx][fy] = abs(sudoku[fx][fy])
+                if fastMode : self.updTblSignal.emit(fx, fy, abs(sudoku[fx][fy]))
         btEnd = True
         self.updSttSignal.emit(0)
         return True
 
     def basic(self):
-        global x, y, sudoku, possibilities, solutedNumbers, noSolution, stopBasic
+        global x, y, sudoku, possibilities, solutedNumbers, noSolution, stopBasic, fastMode
         while stopBasic is False:
             for x in range(9):
                 for y in range(9):
@@ -270,7 +272,7 @@ class calculate(PyQt6.QtCore.QThread):
                         calcPos(x, y)
                         if len(possibilities) == 1:
                             sudoku[x][y] = int(possibilities)
-                            self.updTblSignal.emit(x, y, int(possibilities))
+                            if not fastMode : self.updTblSignal.emit(x, y, int(possibilities))
                             QApplication.processEvents()
                             solutedNumbers += 1
                     possibilities = "123456789"
@@ -291,6 +293,7 @@ if __name__ == "__main__":
     widget = SSGui()
     widget.show()
 
+
     def updTable(uX, uY, uNum):
         global widget
         if uNum != 0:
@@ -307,7 +310,10 @@ if __name__ == "__main__":
         global widget
         if sT == 0:
             widget.btnRun.setText("Finished!")
+            widget.btnFastRun.setText("Finished!")
         else:
             widget.btnRun.setText("No solution found. The sudoku is probably wrong.")
+            # widget.btnFastRun.setText("No solution found. The sudoku is probably wrong.")
+
 
     sys.exit(app.exec())
