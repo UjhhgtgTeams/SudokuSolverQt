@@ -1,5 +1,5 @@
 # SodukuSolver
-This is a really useful sudoku solver with qt gui.\n
+This is a really useful sudoku solver with qt gui.<br>
 Enter the numbers in and click "RUN"!\n
 If you don't want to wait, simply press "FAST RUN" and there you go with the answer!\n
 
