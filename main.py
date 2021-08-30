@@ -1,5 +1,6 @@
 import sys
 import time
+import threading
 import PyQt6.QtCore
 from PySide6.QtWidgets import *
 from PySide6.QtGui import *
@@ -98,12 +99,10 @@ class SSGui(QWidget):
 
     def init_ui(self):
         global lang, sudoku
-
         # Init layout
         layout = QVBoxLayout()
         self.setWindowTitle(r"*** Sudoku Solver GUI ***   |   By: Ujhhgtg")
         self.resize(800, 740)
-
         # Buttons!!!
         # Run Button
         if lang == "zh":
@@ -113,7 +112,6 @@ class SSGui(QWidget):
         self.btnRun.setFont(QFont("Noto Sans", 14))
         self.btnRun.setCursor(QCursor(Qt.PointingHandCursor))
         self.btnRun.clicked.connect(lambda: self.runSolver(0))
-
         # Fast Run Button
         if lang == "zh":
             self.btnFastRun = QPushButton("极速计算!", self)
@@ -122,7 +120,6 @@ class SSGui(QWidget):
         self.btnFastRun.setFont(QFont("Noto Sans", 14))
         self.btnFastRun.setCursor(QCursor(Qt.PointingHandCursor))
         self.btnFastRun.clicked.connect(lambda: self.runSolver(1))
-
         # Tables!!!
         # Sudoku Table
         self.tblSudoku = QTableWidget(9, 9)
@@ -131,7 +128,6 @@ class SSGui(QWidget):
         self.tblSudoku.verticalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.tblSudoku.horizontalHeader().setVisible(False)
         self.tblSudoku.verticalHeader().setVisible(False)
-
         # Set Initial Sudoku
         for ix in range(9):
             for iy in range(9):
@@ -145,7 +141,6 @@ class SSGui(QWidget):
                     tblItem.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter | Qt.AlignCenter)
                     self.tblSudoku.setItem(ix, iy, tblItem)
                     QApplication.processEvents()
-
         # Show Widgets
         layout.addWidget(self.tblSudoku)
         layout.addWidget(self.btnRun)
