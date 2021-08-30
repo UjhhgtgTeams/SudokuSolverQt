@@ -1,11 +1,11 @@
 import sys
 import time
+import PyQt6.QtCore
 from PySide6.QtWidgets import *
 from PySide6.QtGui import *
 from PySide6.QtCore import *
 from math import floor
-import PyQt6.QtCore
-import PyQt6.Qt
+from locale import getdefaultlocale
 
 # For Debug Purpose
 sudokuSelection = 0  # Select the sudoku | Available options : 0, 1, 2
@@ -55,6 +55,7 @@ x = 0
 y = 0
 xP = 0
 yP = 0
+lang = "en"
 stepTime = 0
 btEnd = False
 fastMode = False
@@ -96,7 +97,7 @@ class SSGui(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        global sudoku
+        global lang, sudoku
 
         # Init layout
         layout = QVBoxLayout()
@@ -147,16 +148,20 @@ class SSGui(QWidget):
 
     def runSolver(self, runType):
         global btEnd, sudoku, fastMode
+        self.btnRun.setEnabled(False)
+        self.btnFastRun.setEnabled(False)
         if runType == 0:
-            self.btnRun.setText("Calculating...")
-            self.btnRun.setEnabled(False)
             self.btnFastRun.setText("N/A")
-            self.btnFastRun.setEnabled(False)
+            if lang == "zh":
+                self.btnRun.setText("计算中......")
+            elif lang == "en":
+                self.btnRun.setText("Calculating......")
         else:
             self.btnRun.setText("N/A")
-            self.btnRun.setEnabled(False)
-            self.btnFastRun.setText("Please wait while calculating in the background......")
-            self.btnFastRun.setEnabled(False)
+            if lang == "zh":
+                self.btnFastRun.setText("正在后台计算......")
+            elif lang == "en":
+                self.btnFastRun.setText("Please wait while calculating in the background......")
             fastMode = True
         for ax in range(9):
             for ay in range(9):
@@ -165,8 +170,12 @@ class SSGui(QWidget):
                     try:
                         sudoku[ax][ay] = int(self.tblSudoku.item(ax, ay).text())
                     except:
-                        self.btnRun.setText("Invalid item(s) appeared. Please check and retry.")
-                        self.btnFastRun.setText("Invalid item(s) appeared. Please check and retry.")
+                        if lang == "zh":
+                            self.btnRun.setText("检测到错误的输入! 请检查并重试!")
+                            self.btnFastRun.setText("检测到错误的输入! 请检查并重试!")
+                        elif lang == "en":
+                            self.btnRun.setText("Invalid item(s) appeared. Please check and retry.")
+                            self.btnFastRun.setText("Invalid item(s) appeared. Please check and retry.")
                 else:
                     sudoku[ax][ay] = 0
         # noinspection PyTypeChecker
@@ -190,7 +199,7 @@ class calculate(PyQt6.QtCore.QThread):
         super().__init__()
 
     def run(self):
-        global sudoku, xP, yP, debugMessages, fastMode
+        global xP, yP, sudoku, debugMessages, fastMode
         if xP == 8 and yP == 8 and sudoku[xP][yP] > 0:
             return self.showRight()
         if sudoku[xP][yP] == 0:
@@ -293,6 +302,8 @@ class calculate(PyQt6.QtCore.QThread):
 
 
 if __name__ == "__main__":
+    if getdefaultlocale()[0] == "zh_CN":
+        lang = "zh"
     app = QApplication(sys.argv)
     widget = SSGui()
     widget.show()
@@ -311,13 +322,21 @@ if __name__ == "__main__":
 
 
     def updStatus(sT):
-        global widget
+        global lang, widget
         if sT == 0:
-            widget.btnRun.setText("Finished!")
-            widget.btnFastRun.setText("Finished!")
+            if lang == "zh":
+                widget.btnRun.setText("计算完成!")
+                widget.btnFastRun.setText("计算完成!")
+            elif lang == "en":
+                widget.btnRun.setText("Finished!")
+                widget.btnFastRun.setText("Finished!")
         else:
-            widget.btnRun.setText("No solution found. The sudoku is probably wrong.")
-            # widget.btnFastRun.setText("No solution found. The sudoku is probably wrong.")
+            if lang == "zh":
+                widget.btnRun.setText("无法算出答案!")
+                widget.btnFastRun.setText("无法算出答案!")
+            elif lang == "en":
+                widget.btnRun.setText("No solution found. The sudoku is probably wrong.")
+                widget.btnFastRun.setText("No solution found. The sudoku is probably wrong.")
 
 
     sys.exit(app.exec())
