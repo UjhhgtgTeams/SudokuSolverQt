@@ -1,3 +1,3 @@
-## Sudoku Solver by Ujhhgtg
-
-Hi. Don't worry about this blank site, we will fill in them soon.
+<s>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</s><br>
+Although this is pretty blank, you can browse other things.<br>
+[Back: Main Site](https://ujhhgtgteams.github.io/)
