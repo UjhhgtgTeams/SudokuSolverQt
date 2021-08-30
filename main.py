@@ -183,11 +183,10 @@ class SSGui(QWidget):
         # noinspection PyTypeChecker
         self.tblSudoku.setEditTriggers(QAbstractItemView.NoEditTriggers)
         QApplication.processEvents()
-        subThread = threading.Thread(target=lambda: calculate().run())
-        subThread.setDaemon(True)
+        subThread = calculate()
         subThread.updTblSignal.connect(updTable)
         subThread.updSttSignal.connect(updStatus)
-        # subThread.basic()
+        subThread.basic()
         subThread.start()
         while not btEnd:
             QApplication.processEvents()
@@ -303,8 +302,8 @@ class calculate(PyQt6.QtCore.QThread):
 
 
 if __name__ == "__main__":
-    if getdefaultlocale()[0] == "zh_CN":
-        lang = "zh"
+    # if getdefaultlocale()[0] == "zh_CN":
+    lang = "en"
     app = QApplication(sys.argv)
     widget = SSGui()
     widget.show()
