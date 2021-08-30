@@ -11,6 +11,14 @@ Command: `pip install pyside6 pyqt6`<br>
 Or Linux: `sudo pip install pyside6 pyqt6`<br>
 Then run main.py!<br>
 
+## SCREENSHOTS
+<img src="https://i.loli.net/2021/08/30/fcejxSH92iYEuvp.png">
+Solver Calculating<br>
+<img src="https://i.loli.net/2021/08/30/vGYPeEFjUzcACsl.png">
+Fast Mode<br>
+<img src="https://i.loli.net/2021/08/30/cpjJhBqwoWDS1nu.png">
+The Main Window
+
 ## FAQ
 Q: What is the default sudoku it shows us?<br>
 A: It is the hardest sudoku in the world, made by a mathematician in Finland.<br>
