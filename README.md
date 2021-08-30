@@ -16,7 +16,4 @@ Q: What is the default sudoku it shows us?<br>
 A: It is the hardest sudoku in the world, made by a mathematician in Finland.<br>
 
 ## KNOWN BUGS
-[1] If using fast mode, the program may state that there is no solution, but there actually is a VALID solution (and it will be shown).<br>
-<b>FIX: v1.0.3</b><br>
-[2] If the main window is closed (hit the X button) and the solver is still running, the program will may stay on until the solver finished.<br>
-<b>FIX: v1.0.3</b><br>
+[1] If the main window is closed (hit the X button) and the solver is still running, the program will may stay on until the solver finished.<br>
