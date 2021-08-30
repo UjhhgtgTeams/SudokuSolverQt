@@ -183,10 +183,11 @@ class SSGui(QWidget):
         # noinspection PyTypeChecker
         self.tblSudoku.setEditTriggers(QAbstractItemView.NoEditTriggers)
         QApplication.processEvents()
-        subThread = calculate()
+        subThread = threading.Thread(target=lambda: calculate().run())
+        subThread.setDaemon(True)
         subThread.updTblSignal.connect(updTable)
         subThread.updSttSignal.connect(updStatus)
-        subThread.basic()
+        # subThread.basic()
         subThread.start()
         while not btEnd:
             QApplication.processEvents()
