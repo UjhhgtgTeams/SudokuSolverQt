@@ -12,12 +12,9 @@ Or Linux: `sudo pip install pyside6 pyqt6`<br>
 Then run main.py!<br>
 
 ## SCREENSHOTS
-<img src="https://i.loli.net/2021/08/30/fcejxSH92iYEuvp.png">
-Solver Calculating<br>
-<img src="https://i.loli.net/2021/08/30/vGYPeEFjUzcACsl.png">
-Fast Mode<br>
-<img src="https://i.loli.net/2021/08/30/cpjJhBqwoWDS1nu.png">
-The Main Window
+<img src="https://i.loli.net/2021/08/30/fcejxSH92iYEuvp.png" width="75%"/><br>
+<img src="https://i.loli.net/2021/08/30/vGYPeEFjUzcACsl.png" width="75%"/><br>
+<img src="https://i.loli.net/2021/08/30/cpjJhBqwoWDS1nu.png" width="75%"/><br>
 
 ## FAQ
 Q: What is the default sudoku it shows us?<br>

@@ -1,6 +1,5 @@
 import sys
 import time
-import threading
 import PyQt6.QtCore
 from PySide6.QtWidgets import *
 from PySide6.QtGui import *
@@ -302,8 +301,8 @@ class calculate(PyQt6.QtCore.QThread):
 
 
 if __name__ == "__main__":
-    # if getdefaultlocale()[0] == "zh_CN":
-    lang = "en"
+    if getdefaultlocale()[0] == "zh_CN":
+        lang = "zh"
     app = QApplication(sys.argv)
     widget = SSGui()
     widget.show()

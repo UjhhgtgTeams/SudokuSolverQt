@@ -9,7 +9,7 @@ Also, it is convenient to use. Hit `pip install pyside6 pyqt6` in the terminal, 
 ## Usage
 You want to try it out now? Easy!<br>
 Download the main.py from the latest release, and run it.<br>
-[Try it now!](https://github.com/UjhhgtgTeams/SudokuSolver/releases/latest/download/)
+[Get it Now!](https://github.com/UjhhgtgTeams/SudokuSolver/releases/latest/download/main.py)
 
 ## Navigator
 [Back: Main Site](https://ujhhgtgteams.github.io/)
