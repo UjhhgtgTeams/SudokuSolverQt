@@ -1,12 +1,18 @@
 import sys
 import time
-import PyQt6.QtCore
-from PySide6.QtWidgets import *
-from PySide6.QtGui import *
-from PySide6.QtCore import *
 from math import floor
 from locale import getdefaultlocale
-from resc import translates
+try:
+    import PyQt6.QtCore
+    from PySide6.QtWidgets import *
+    from PySide6.QtGui import *
+    from PySide6.QtCore import *
+except:
+    raise ImportError("Required Qt module(s) not found, quitting......")
+try:
+    from resc import translates
+except:
+    raise ImportError("Required resources not found, quitting......")
 
 # For Debug Purpose
 sudokuSelection = 0  # Select the sudoku | Available options : 0, 1, 2
