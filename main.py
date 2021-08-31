@@ -6,6 +6,7 @@ from PySide6.QtGui import *
 from PySide6.QtCore import *
 from math import floor
 from locale import getdefaultlocale
+from resc import translates
 
 # For Debug Purpose
 sudokuSelection = 0  # Select the sudoku | Available options : 0, 1, 2
@@ -55,7 +56,6 @@ x = 0
 y = 0
 xP = 0
 yP = 0
-lang = "en"
 stepTime = 0
 btEnd = False
 fastMode = False
@@ -104,18 +104,12 @@ class SSGui(QWidget):
         self.resize(800, 740)
         # Buttons!!!
         # Run Button
-        if lang == "zh":
-            self.btnRun = QPushButton("开始计算!", self)
-        elif lang == "en":
-            self.btnRun = QPushButton("RUN!!!", self)
+        self.btnRun = QPushButton(translates[lang]["btnRunName"], self)
         self.btnRun.setFont(QFont("Noto Sans", 14))
         self.btnRun.setCursor(QCursor(Qt.PointingHandCursor))
         self.btnRun.clicked.connect(lambda: self.runSolver(0))
         # Fast Run Button
-        if lang == "zh":
-            self.btnFastRun = QPushButton("极速计算!", self)
-        elif lang == "en":
-            self.btnFastRun = QPushButton("FAST MODE!!!", self)
+        self.btnFastRun = QPushButton(translates[lang]["btnFastModeName"], self)
         self.btnFastRun.setFont(QFont("Noto Sans", 14))
         self.btnFastRun.setCursor(QCursor(Qt.PointingHandCursor))
         self.btnFastRun.clicked.connect(lambda: self.runSolver(1))
@@ -152,16 +146,10 @@ class SSGui(QWidget):
         self.btnFastRun.setEnabled(False)
         if runType == 0:
             self.btnFastRun.setText("N/A")
-            if lang == "zh":
-                self.btnRun.setText("计算中......")
-            elif lang == "en":
-                self.btnRun.setText("Calculating......")
+            self.btnRun.setText(translates[lang]["calcText"])
         else:
             self.btnRun.setText("N/A")
-            if lang == "zh":
-                self.btnFastRun.setText("正在后台计算......")
-            elif lang == "en":
-                self.btnFastRun.setText("Calculating in the background......")
+            self.btnFastRun.setText(translates[lang]["fastModeText"])
             fastMode = True
         for ax in range(9):
             for ay in range(9):
@@ -170,12 +158,8 @@ class SSGui(QWidget):
                     try:
                         sudoku[ax][ay] = int(self.tblSudoku.item(ax, ay).text())
                     except:
-                        if lang == "zh":
-                            self.btnRun.setText("检测到错误的输入! 请检查并重试!")
-                            self.btnFastRun.setText("检测到错误的输入! 请检查并重试!")
-                        elif lang == "en":
-                            self.btnRun.setText("Invalid item(s) appeared. Please check and retry.")
-                            self.btnFastRun.setText("Invalid item(s) appeared. Please check and retry.")
+                        self.btnRun.setText(translates[lang]["invalidItemsText"])
+                        self.btnFastRun.setText(translates[lang]["invalidItemsText"])
 
                 else:
                     sudoku[ax][ay] = 0
@@ -303,6 +287,8 @@ class calculate(PyQt6.QtCore.QThread):
 if __name__ == "__main__":
     if getdefaultlocale()[0] == "zh_CN":
         lang = "zh"
+    else:
+        lang = "en"
     app = QApplication(sys.argv)
     widget = SSGui()
     widget.show()
@@ -322,12 +308,8 @@ if __name__ == "__main__":
 
     def updStatus():
         global lang, widget
-        if lang == "zh":
-            widget.btnRun.setText("计算完成!")
-            widget.btnFastRun.setText("计算完成!")
-        elif lang == "en":
-            widget.btnRun.setText("Finished!")
-            widget.btnFastRun.setText("Finished!")
+        widget.btnRun.setText(translates[lang]["calcEndText"])
+        widget.btnFastRun.setText(translates[lang]["calcEndText"])
 
 
     sys.exit(app.exec())
