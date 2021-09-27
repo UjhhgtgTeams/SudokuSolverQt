@@ -1,7 +1,9 @@
 import sys
 import time
+import json
 from math import floor
 from locale import getdefaultlocale
+
 try:
     import PyQt6.QtCore
     from PySide6.QtWidgets import *
@@ -10,7 +12,7 @@ try:
 except:
     raise ImportError("Required Qt module(s) not found, quitting......")
 try:
-    from resc import translates
+    from resc import *
 except:
     raise ImportError("Required resources not found, quitting......")
 
@@ -18,45 +20,6 @@ except:
 sudokuSelection = 0  # Select the sudoku | Available options : 0, 1, 2
 debugMessages = False  # Toggle if print debug messages | Available options : False, True
 # END
-
-if sudokuSelection == 0:
-    sudoku = [
-        [8, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 3, 6, 0, 0, 0, 0, 0],
-        [0, 7, 0, 0, 9, 0, 2, 0, 0],
-        [0, 5, 0, 0, 0, 7, 0, 0, 0],
-        [0, 0, 0, 0, 4, 5, 7, 0, 0],
-        [0, 0, 0, 1, 0, 0, 0, 3, 0],
-        [0, 0, 1, 0, 0, 0, 0, 6, 8],
-        [0, 0, 8, 5, 0, 0, 0, 1, 0],
-        [0, 9, 0, 0, 0, 0, 4, 0, 0]
-    ]
-elif sudokuSelection == 1:
-    sudoku = [
-        [7, 4, 0, 2, 0, 9, 0, 0, 0],
-        [0, 2, 0, 0, 8, 4, 0, 9, 0],
-        [8, 0, 0, 0, 0, 3, 4, 0, 0],
-        [5, 8, 0, 3, 0, 0, 0, 0, 0],
-        [0, 0, 1, 0, 6, 0, 5, 0, 0],
-        [0, 0, 0, 0, 0, 5, 0, 1, 9],
-        [0, 0, 7, 5, 0, 0, 0, 0, 1],
-        [0, 5, 0, 1, 4, 0, 0, 7, 0],
-        [0, 0, 0, 9, 0, 2, 0, 5, 4]
-    ]
-elif sudokuSelection == 2:
-    sudoku = [
-        [0, 8, 0, 0, 0, 0, 0, 0, 0],
-        [0, 1, 5, 0, 9, 0, 0, 0, 0],
-        [0, 0, 0, 6, 0, 8, 1, 0, 0],
-        [5, 0, 0, 3, 4, 0, 2, 0, 0],
-        [1, 7, 0, 0, 0, 0, 0, 9, 4],
-        [0, 0, 3, 0, 8, 9, 0, 0, 1],
-        [0, 0, 9, 5, 0, 4, 0, 0, 0],
-        [0, 0, 0, 0, 3, 0, 6, 7, 0],
-        [0, 0, 0, 0, 0, 0, 0, 5, 0]
-    ]
-else:
-    raise ValueError("Invalid sudoku selection.")
 
 x = 0
 y = 0
@@ -69,6 +32,19 @@ stopBasic = False
 noSolution = False
 solutedNumbers = 0
 possibilities = "123456789"
+fileName = "settings.json"
+
+with open(fileName, 'r+') as settingObject:
+    settings = json.load(settingObject)
+
+if sudokuSelection == 0:
+    sudoku = sudoku1
+elif sudokuSelection == 1:
+    sudoku = sudoku2
+elif sudokuSelection == 2:
+    sudoku = sudoku3
+else:
+    raise ValueError("Invalid sudoku selection.")
 
 
 def calcPos(xN, yN, sN=0, calcT=True):
@@ -127,6 +103,10 @@ class SSGui(QWidget):
         self.tblSudoku.verticalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.tblSudoku.horizontalHeader().setVisible(False)
         self.tblSudoku.verticalHeader().setVisible(False)
+        # Check Boxes!!!
+        # Fast Mode Check Box
+        self.chkBoxFast = QCheckBox()
+        self.chkBoxFast.setFont(QFont("Noto Sans", 14))
         # Set Initial Sudoku
         for ix in range(9):
             for iy in range(9):
