@@ -32,10 +32,6 @@ stopBasic = False
 noSolution = False
 solutedNumbers = 0
 possibilities = "123456789"
-fileName = "settings.json"
-
-with open(fileName, 'r+') as settingObject:
-    settings = json.load(settingObject)
 
 if sudokuSelection == 0:
     sudoku = sudoku1
