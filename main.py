@@ -1,25 +1,13 @@
 import sys
 import time
-import json
+from resc import *
 from math import floor
 from locale import getdefaultlocale
 
-try:
-    import PyQt6.QtCore
-    from PySide6.QtWidgets import *
-    from PySide6.QtGui import *
-    from PySide6.QtCore import *
-except:
-    raise ImportError("Required Qt module(s) not found, quitting......")
-try:
-    from resc import *
-except:
-    raise ImportError("Required resources not found, quitting......")
-
-# For Debug Purpose
-sudokuSelection = 0  # Select the sudoku | Available options : 0, 1, 2
-debugMessages = False  # Toggle if print debug messages | Available options : False, True
-# END
+import PyQt6.QtCore
+from PySide6.QtWidgets import *
+from PySide6.QtGui import *
+from PySide6.QtCore import *
 
 x = 0
 y = 0
@@ -32,15 +20,6 @@ stopBasic = False
 noSolution = False
 solutedNumbers = 0
 possibilities = "123456789"
-
-if sudokuSelection == 0:
-    sudoku = sudoku1
-elif sudokuSelection == 1:
-    sudoku = sudoku2
-elif sudokuSelection == 2:
-    sudoku = sudoku3
-else:
-    raise ValueError("Invalid sudoku selection.")
 
 
 def calcPos(xN, yN, sN=0, calcT=True):
@@ -166,7 +145,7 @@ class calculate(PyQt6.QtCore.QThread):
         super().__init__()
 
     def run(self):
-        global xP, yP, sudoku, debugMessages, fastMode
+        global xP, yP, sudoku, fastMode
         if xP == 8 and yP == 8 and sudoku[xP][yP] > 0:
             return self.showRight()
         if sudoku[xP][yP] == 0:
@@ -175,7 +154,6 @@ class calculate(PyQt6.QtCore.QThread):
                 if calcPos(xP, yP, testNum, False) is False:
                     continue
                 sudoku[xP][yP] = testNum
-                if debugMessages: print("Set ", xP, ", ", yP, " to ", testNum, ".", sep="")
                 if not fastMode: self.updTblSignal.emit(xP, yP, abs(testNum))
                 if not fastMode: time.sleep(0.00000000000000000000000000000000000000000000000001)
                 if xP == 8 and yP == 8:
@@ -188,7 +166,7 @@ class calculate(PyQt6.QtCore.QThread):
             self.run()
 
     def stepGrid(self, stepType):
-        global xP, yP, stepTime, sudoku, debugMessages, fastMode
+        global xP, yP, stepTime, sudoku, fastMode
         stepTime += 1
         if stepType == "n":
             if yP != 8:
@@ -197,7 +175,6 @@ class calculate(PyQt6.QtCore.QThread):
                     self.stepGrid("n")
                 else:
                     sudoku[xP][yP] = 0
-                    if debugMessages: print("Set ", xP, ", ", yP, " to 0.", sep="")
                     if not fastMode: self.updTblSignal.emit(xP, yP, 0)
             else:
                 if xP != 8:
@@ -207,7 +184,6 @@ class calculate(PyQt6.QtCore.QThread):
                         self.stepGrid("n")
                     else:
                         sudoku[xP][yP] = 0
-                        if debugMessages: print("Set ", xP, ", ", yP, " to 0.", sep="")
                         if not fastMode: self.updTblSignal.emit(xP, yP, 0)
                 else:
                     return self.showRight()
@@ -218,7 +194,6 @@ class calculate(PyQt6.QtCore.QThread):
                     self.stepGrid("b")
                 else:
                     sudoku[xP][yP] = 0
-                    if debugMessages: print("Set ", xP, ", ", yP, " to 0.", sep="")
                     if not fastMode: self.updTblSignal.emit(xP, yP, 0)
             else:
                 if xP != 0:
@@ -228,7 +203,6 @@ class calculate(PyQt6.QtCore.QThread):
                         self.stepGrid("b")
                     else:
                         sudoku[xP][yP] = 0
-                        if debugMessages: print("Set ", xP, ", ", yP, " to 0.", sep="")
                         if not fastMode: self.updTblSignal.emit(xP, yP, 0)
 
     def showRight(self):
