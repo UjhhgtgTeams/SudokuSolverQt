@@ -1,4 +1,3 @@
-import time
 import threading
 from math import floor
 from resc import *
@@ -19,6 +18,7 @@ class ScreenManager(ScreenManager):
 
 
 class SolverScreen(Screen):
+    # noinspection PyMethodMayBeStatic
     def runSolver(self):
         basic()
         btThread = threading.Thread(name="backtrackSolver", target=backtrack)
