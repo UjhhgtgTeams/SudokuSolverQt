@@ -1,16 +1,38 @@
-import sys
 import time
-from resc import *
+import threading
 from math import floor
-from locale import getdefaultlocale
+from resc import *
+from kivy.app import App
+from kivy.lang import Builder
+from kivy.uix.screenmanager import ScreenManager, Screen
+Builder.load_file("KivyLayout.kv")
 
-x = 0
-y = 0
-xP = 0
-yP = 0
+
+class KivySolverApp(App):
+    def build(self):
+        return ScreenManager()
+
+
+# noinspection PyRedeclaration
+class ScreenManager(ScreenManager):
+    pass
+
+
+class SolverScreen(Screen):
+    def runSolver(self):
+        basic()
+        btThread = threading.Thread(name="backtrackSolver", target=backtrack)
+        btThread.setDaemon(True)
+        btThread.start()
+
+
+class SettingScreen(Screen):
+    pass
+
+
+x = y = xP = yP = 0
 stepTime = 0
 btEnd = False
-fastMode = False
 stopBasic = False
 noSolution = False
 solutedNumbers = 0
@@ -42,95 +64,98 @@ def calcPos(xN, yN, sN=0, calcT=True):
                     return False
 
 
-
-# noinspection PyUnresolvedReferences
-class calculate:
-    def __init__(self):
-        super().__init__()
-
-    def run(self):
-        global xP, yP, sudoku, fastMode
-        if xP == 8 and yP == 8 and sudoku[xP][yP] > 0:
-            return self.showRight()
-        if sudoku[xP][yP] == 0:
-            for testNum in range(1, 10):
-                testNum = 0 - testNum
-                if calcPos(xP, yP, testNum, False) is False:
-                    continue
-                sudoku[xP][yP] = testNum
-                if not fastMode: time.sleep(0.00000000000000000000000000000000000000000000000001)
-                if xP == 8 and yP == 8:
-                    return self.showRight()
-                self.stepGrid("n")
-                self.run()
-            self.stepGrid("b")
+def stepGrid(stepType):
+    global xP, yP, stepTime, sudoku
+    stepTime += 1
+    if stepType == "n":
+        if yP != 8:
+            yP += 1
+            if sudoku[xP][yP] > 0:
+                stepGrid("n")
+            else:
+                sudoku[xP][yP] = 0
         else:
-            self.stepGrid("n")
-            self.run()
-
-    def stepGrid(self, stepType):
-        global xP, yP, stepTime, sudoku, fastMode
-        stepTime += 1
-        if stepType == "n":
-            if yP != 8:
-                yP += 1
+            if xP != 8:
+                xP += 1
+                yP = 0
                 if sudoku[xP][yP] > 0:
-                    self.stepGrid("n")
+                    stepGrid("n")
                 else:
                     sudoku[xP][yP] = 0
             else:
-                if xP != 8:
-                    xP += 1
-                    yP = 0
-                    if sudoku[xP][yP] > 0:
-                        self.stepGrid("n")
-                    else:
-                        sudoku[xP][yP] = 0
-                else:
-                    return self.showRight()
-        elif stepType == "b":
-            if yP != 0:
-                yP -= 1
+                return showRight()
+    elif stepType == "b":
+        if yP != 0:
+            yP -= 1
+            if sudoku[xP][yP] > 0:
+                stepGrid("b")
+            else:
+                sudoku[xP][yP] = 0
+        else:
+            if xP != 0:
+                xP -= 1
+                yP = 8
                 if sudoku[xP][yP] > 0:
-                    self.stepGrid("b")
+                    stepGrid("b")
                 else:
                     sudoku[xP][yP] = 0
-            else:
-                if xP != 0:
-                    xP -= 1
-                    yP = 8
-                    if sudoku[xP][yP] > 0:
-                        self.stepGrid("b")
-                    else:
-                        sudoku[xP][yP] = 0
 
-    def showRight(self):
-        global sudoku, stepTime, btEnd, fastMode
-        for fx in range(9):
-            for fy in range(9):
-                sudoku[fx][fy] = abs(sudoku[fx][fy])
-        btEnd = True
-        return True
 
-    def basic(self):
-        global x, y, sudoku, possibilities, solutedNumbers, noSolution, stopBasic, fastMode
-        while stopBasic is False:
-            for x in range(9):
-                for y in range(9):
-                    if sudoku[x][y] == 0:
-                        calcPos(x, y)
-                        if len(possibilities) == 1:
-                            sudoku[x][y] = int(possibilities)
-                            solutedNumbers += 1
-                    possibilities = "123456789"
-            if solutedNumbers == 0:
-                noSolution = True
-                pass
-                break
-            solutedNumbers = 0
-            stopBasic = True
-            for n in range(9):
-                for p in range(9):
-                    if sudoku[n][p] == 0:
-                        stopBasic = False
+def backtrack():
+    global xP, yP, sudoku
+    if xP == 8 and yP == 8 and sudoku[xP][yP] > 0:
+        return showRight()
+    if sudoku[xP][yP] == 0:
+        for testNum in range(1, 10):
+            testNum = 0 - testNum
+            if calcPos(xP, yP, testNum, False) is False:
+                continue
+            sudoku[xP][yP] = testNum
+            if xP == 8 and yP == 8:
+                return showRight()
+            stepGrid("n")
+            backtrack()
+        stepGrid("b")
+    else:
+        stepGrid("n")
+        backtrack()
 
+
+def showRight():
+    global sudoku, stepTime, btEnd
+    for fx in range(9):
+        for fy in range(9):
+            sudoku[fx][fy] = abs(sudoku[fx][fy])
+    btEnd = True
+    for px in range(9):
+        for py in range(9):
+            print(sudoku[px][py], sep="", end="")
+            print(" ", sep="", end="")
+        print("\n", sep="", end="")
+    return True
+
+
+def basic():
+    global x, y, sudoku, possibilities, solutedNumbers, noSolution, stopBasic
+    while stopBasic is False:
+        for x in range(9):
+            for y in range(9):
+                if sudoku[x][y] == 0:
+                    calcPos(x, y)
+                    if len(possibilities) == 1:
+                        sudoku[x][y] = int(possibilities)
+                        solutedNumbers += 1
+                possibilities = "123456789"
+        if solutedNumbers == 0:
+            noSolution = True
+            pass
+            break
+        solutedNumbers = 0
+        stopBasic = True
+        for n in range(9):
+            for p in range(9):
+                if sudoku[n][p] == 0:
+                    stopBasic = False
+
+
+KivySolverApp().run()
