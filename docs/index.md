@@ -1,7 +1,7 @@
-# Sudoku Solver Qt
+# SudokuSolverQt
 
 ## Introduction
-This is a light-weight solver to sudokus. It can solve the "hardest" sudoku in 3 seconds, thanks to the backtrack algorithm it uses.
+This is a light-weight sudoku solver.It can solve the "hardest" sudoku in 3 seconds, thanks to the backtrack algorithm it uses.
 
 ## Usage
 1. Clone the project.
